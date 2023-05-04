@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+       
+<!-- @Autowired 사용을 위해 -->
+    <context:annotation-config/> 
+    <context:component-scan base-package="com.board"/>
+    
+    <!--  
+    <context:component-scan base-package="com.dao"/>
+    		com.board.dao 패키지에 있는 @Component가 적용된 클래스만 빈즈로 자동 등록
+    <context:component-scan base-package="com.controller"/>
+    		com.board.controller 패키지에 있는 @Component가 적용된 클래스만 빈즈로 자동 등록
+    -->
+    <!-- 
+    <context:component-scan base-package="com.board"/>을 쓰면 필요 없음
+    <bean class="com.board.dao.BoardDaoImp" />
+    <bean class="com.board.controller.ListController" />
+    <bean class="com.board.controller.WriteController" />
+    글상세보기 및 다운로드
+    <bean class="com.board.controller.DetailController" />
+    <bean class="com.board.controller.UpdateController" />
+    <bean class="com.board.controller.DeleteController" /> 
+    -->
+    
+    <!--return new ModelAndView("downloadView","downloadFile",downloadFile);
+        다운로드받을 DownloadView클래스의 빈즈가 등록(생성)  -->
+    <bean id="downloadView" class="com.board.view.DownloadView" />
+    
+    <!-- tiles (ViewResolver)설정 -->
+    <bean id="tilesConfigurer" 
+      class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+        <property name="definitions">
+            <list>
+                <value>/WEB-INF/tiles-def/tilesdef.xml</value>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="viewResolver" 
+     class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass"
+         value="org.springframework.web.servlet.view.tiles3.TilesView"/>
+        <property name="order" value="1"/>
+    </bean>
+    
+    <!-- 리소스 번들 설정=>웹상에 공통으로 출력할 문자열이나 에러메세지를 등록해서 
+                                   필요로했을때 출력시켜주는 파일
+       리소스번들을 이용해서 처리(~.properties) 글쓰기
+       1.jdbc.properties(DB) 2.공통 문자열 메세지를 파일로 등록->불러와서 출력
+       3.유효성 검사를 위한 에러메세지를 파일로 등록->불러와서 출력
+       messages.label->패키지명.불러올파일명.properties(확장자가 생략됨)
+       messages.validation->messages패키지에 있는 validattion.properties파일
+      
+       리소스번들파일을 불러오는 환경설정
+           리소스번들파일 ->웹상에서 필요로하는 문자열이나 유효성검사에 관련된 부분을 불러올 수 있도록
+                             파일
+          messages(패키지명).label(불러올 파일명)~.properties이 생략                   
+     -->
+     <bean id="messageSource" 
+        class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+	        <list>
+	            <value>messages.label</value>
+	            <value>messages.validation</value>
+	        </list>
+        </property>
+        <!-- <property name="defaultEncoding" value="utf-8" /> -->
+    </bean>
+    
+    <!-- 예외페이지 작성했을때 처리해주는 빈즈클래스 등록
+     SimpleMappingExceptionResolver ->웹상에서 에러가 발생->개발자가 작성한 예외처리
+     페이지를 출력시켜준다.
+     <props>
+                    <prop key="java.lang.Exception(발생한 예외처리클래스명)">예외처리페이지명</prop>
+     </props>
+     -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+             <props>
+                    <prop key="java.lang.Exception">pageError</prop>
+             </props>
+        </property>
+    </bean>
+    
+    <!-- 파일 다운로드뷰를 위한 전용 viewResolver를 빈즈로 등록 -->
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" 
+              p:order="0" />
+      
+    <!--파일업로드 52428800->byte단위 50MB->51,200kb->52,428,800byte
+         CommonsMultipartResolver ->업로드 관여하는 클래스를 빈즈로 등록
+         maxUploadSize(최대업로드 크기를 지정)
+         defaultEncoding(한글처리 부분설정)
+      -->
+    <bean id="multipartResolver"
+    class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+      <property name="maxUploadSize" value="52428800" />
+      <property name="defaultEncoding"  value="utf-8" />
+    </bean>
+    
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
